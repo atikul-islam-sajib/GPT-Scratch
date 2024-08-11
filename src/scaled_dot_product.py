@@ -6,6 +6,8 @@ import torch.nn as nn
 
 sys.path.append("./src/")
 
+from utils import config
+
 
 def scaled_dot_product_attention(
     query: torch.Tensor, key: torch.Tensor, value: torch.Tensor, mask=None
@@ -38,11 +40,27 @@ def scaled_dot_product_attention(
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Scaled dot product attention for GPT".title()
+    )
+    args = parser.parse_args()
+
+    batch_size = config()["embedding"]["batch_size"]
+    block_size = config()["embedding"]["block_size"]
+
+    nheads = config()["GPT"]["nheads"]
+    dimension = config()["GPT"]["dimension"]
+
     scaled = scaled_dot_product_attention(
-        query=torch.randn(40, 8, 200, 64),
-        key=torch.randn(40, 8, 200, 64),
-        value=torch.randn(40, 8, 200, 64),
-        mask=torch.randn(40, 200),
+        query=torch.randn(batch_size, nheads, block_size, dimension // nheads),
+        key=torch.randn(batch_size, nheads, block_size, dimension // nheads),
+        value=torch.randn(batch_size, nheads, block_size, dimension // nheads),
+        mask=torch.randn(batch_size, block_size),
     )
 
-    print(scaled.size())
+    assert scaled.size() == (
+        batch_size,
+        nheads,
+        block_size,
+        dimension // nheads,
+    ), "Error in scaled dot product attention".capitalize()
