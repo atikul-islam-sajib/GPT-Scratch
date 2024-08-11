@@ -50,6 +50,36 @@ class UnitTest(unittest.TestCase):
             ),
         )
 
+        self.assertEqual(
+            scaled_dot_product_attention(
+                query=torch.randn(
+                    self.batch_size,
+                    self.nheads,
+                    self.block_size,
+                    self.dimension // self.nheads,
+                ),
+                key=torch.randn(
+                    self.batch_size,
+                    self.nheads,
+                    self.block_size,
+                    self.dimension // self.nheads,
+                ),
+                value=torch.randn(
+                    self.batch_size,
+                    self.nheads,
+                    self.block_size,
+                    self.dimension // self.nheads,
+                ),
+                mask=None,
+            ).size(),
+            (
+                self.batch_size,
+                self.nheads,
+                self.block_size,
+                self.dimension // self.nheads,
+            ),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
