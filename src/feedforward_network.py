@@ -1,11 +1,13 @@
+import os
 import sys
 import torch
 import argparse
 import torch.nn as nn
+from torchview import draw_graph
 
 sys.path.append("./src/")
 
-from utils import config
+from utils import dump, config
 
 
 class FeedForwardNeuralNetwork(nn.Module):
@@ -113,3 +115,12 @@ if __name__ == "__main__":
         block_size,
         args.in_features,
     ), "Network output size is not correct".capitalize()
+
+    draw_graph(
+        model=network, input_data=torch.randn(batch_size, block_size, args.in_features)
+    ).visual_graph.render(
+        filename=os.path.join(
+            config()["path"]["FILES_PATH"], "feedforward_network.png"
+        ),
+        format="png",
+    )
