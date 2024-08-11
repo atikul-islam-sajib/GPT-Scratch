@@ -5,6 +5,8 @@ import torch.nn as nn
 
 sys.path.append("./src/")
 
+from utils import config
+
 
 class FeedForwardNeuralNetwork(nn.Module):
     def __init__(
@@ -60,6 +62,21 @@ class FeedForwardNeuralNetwork(nn.Module):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="FeedForwardNeuralNetwork for GPT".capitalize()
+    )
+    parser.add_argument(
+        "--in_features",
+        type=int,
+        default=config()["GPT"]["dimension"],
+        help="Input features",
+    )
+    parser.add_argument(
+        "--out_features",
+        type=int,
+        default=config()["GPT"]["dimension"],
+        help="Output features".capitalize(),
+    )
     network = FeedForwardNeuralNetwork(
         in_features=512,
         out_features=2048,
