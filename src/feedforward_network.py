@@ -13,6 +13,7 @@ class FeedForwardNeuralNetwork(nn.Module):
         out_features: int = 2048,
         dropout: float = 0.1,
         activation: str = "relu",
+        bias: bool = True,
     ):
         super(FeedForwardNeuralNetwork, self).__init__()
 
@@ -20,6 +21,7 @@ class FeedForwardNeuralNetwork(nn.Module):
         self.out_features = out_features
         self.dropout = dropout
         self.activation = activation
+        self.bias = bias
 
         if self.activation == "relu":
             self.activation_fn = nn.ReLU(inplace=True)
@@ -32,6 +34,38 @@ class FeedForwardNeuralNetwork(nn.Module):
 
         self.layers = list()
 
+        for index in range(2):
+            self.layers.append(
+                nn.Linear(
+                    in_features=self.in_features,
+                    out_features=self.out_features,
+                    bias=self.bias,
+                )
+            )
+            if index == 0:
+                self.layers.append(self.activation_fn)
+                self.layers.append(nn.Dropout(p=self.dropout))
+
+            self.in_features = self.out_features
+            self.out_features = in_features
+
+        self.model = nn.Sequential(*self.layers)
+
     def forward(self, x: torch.Tensor):
         if isinstance(x, torch.Tensor):
-            pass
+            return self.model(x)
+
+        else:
+            raise TypeError("Input must be a torch.Tensor".capitalize())
+
+
+if __name__ == "__main__":
+    network = FeedForwardNeuralNetwork(
+        in_features=512,
+        out_features=2048,
+        activation="gelu",
+        dropout=0.1,
+        bias=True,
+    )
+
+    print(network(torch.randn(400, 200, 512)).size())
