@@ -2,8 +2,9 @@
 embedding:
   batch_size: 40
   block_size: 200
-  
+
 GPT:
   dimension: 512
   nheads: 8
   dropout: 0.1
+  bias: True

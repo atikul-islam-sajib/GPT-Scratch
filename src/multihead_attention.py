@@ -31,48 +31,97 @@ class MultiHeadAttentionLayer(nn.Module):
             in_features=self.dimension, out_features=3 * self.dimension, bias=self.bias
         )
 
+        self.layer = nn.Linear(
+            in_features=self.dimension, out_features=self.dimension, bias=self.bias
+        )
+
     def forward(self, x: torch.Tensor, mask=None):
         if isinstance(x, torch.Tensor):
             QKV = self.QKV(x)
 
-            query, key, value = torch.chunk(input=QKV, chunks=3, dim=-1)
+            self.query, self.key, self.value = torch.chunk(input=QKV, chunks=3, dim=-1)
 
             assert (
-                query.size() == key.size() == value.size()
+                self.query.size() == self.key.size() == self.value.size()
             ), "QKV must have the same size".capitalize()
 
-            query = query.view(
-                query.size(0), query.size(1), self.nheads, self.dimension // self.nheads
+            self.query = self.query.view(
+                self.query.size(0),
+                self.query.size(1),
+                self.nheads,
+                self.dimension // self.nheads,
             )
-            key = key.view(
-                key.size(0), key.size(1), self.nheads, self.dimension // self.nheads
+            self.key = self.key.view(
+                self.key.size(0),
+                self.key.size(1),
+                self.nheads,
+                self.dimension // self.nheads,
             )
-            value = value.view(
-                value.size(0), value.size(1), self.nheads, self.dimension // self.nheads
+            self.value = self.value.view(
+                self.value.size(0),
+                self.value.size(1),
+                self.nheads,
+                self.dimension // self.nheads,
             )
 
-            query = query.permute(0, 2, 1, 3)
-            key = key.permute(0, 2, 1, 3)
-            value = value.permute(0, 2, 1, 3)
+            self.query = self.query.permute(0, 2, 1, 3)
+            self.key = self.key.permute(0, 2, 1, 3)
+            self.value = self.value.permute(0, 2, 1, 3)
 
-            attention = scaled_dot_product_attention(
-                query=query, key=key, value=value, mask=mask
+            self.attention = scaled_dot_product_attention(
+                query=self.query, key=self.key, value=self.value, mask=mask
             )
 
             assert (
-                attention.size() == query.size() == key.size() == value.size()
+                self.attention.size()
+                == self.query.size()
+                == self.key.size()
+                == self.value.size()
             ), "Attention must have the same size as QKV".capitalize()
 
-            attention = attention.view(
-                attention.size(0),
-                attention.size(2),
-                attention.size(1) * attention.size(3),
+            self.attention = self.attention.view(
+                self.attention.size(0),
+                self.attention.size(2),
+                self.attention.size(1) * self.attention.size(3),
             )
 
-            return attention
+            return self.layer(self.attention)
 
 
 if __name__ == "__main__":
-    attention = MultiHeadAttentionLayer(dimension=512, nheads=8, dropout=0.1, bias=True)
+    parser = argparse.ArgumentParser(
+        description="Multi Head Attention Layer for GPT".title()
+    )
+    parser.add_argument(
+        "--dimension",
+        type=int,
+        default=config()["GPT"]["dimension"],
+        help="Dimension of the input",
+    )
+    parser.add_argument(
+        "--nheads", type=int, default=config()["GPT"]["nheads"], help="Number of heads"
+    )
+    parser.add_argument(
+        "--dropout", type=float, default=config()["GPT"]["dropout"], help="Dropout rate"
+    )
+    parser.add_argument(
+        "--bias", type=bool, default=config()["GPT"]["bias"], help="Bias term"
+    )
 
-    print(attention(torch.randn(40, 200, 512)).size())
+    args = parser.parse_args()
+
+    batch_size = config()["embedding"]["batch_size"]
+    block_size = config()["embedding"]["block_size"]
+
+    attention = MultiHeadAttentionLayer(
+        dimension=args.dimension,
+        nheads=args.nheads,
+        dropout=args.dropout,
+        bias=args.bias,
+    )
+
+    assert attention(torch.randn(batch_size, block_size, args.dimension)).size() == (
+        batch_size,
+        block_size,
+        args.dimension,
+    ), "MultiHeadAttentionLayer is not working properly".capitalize()
