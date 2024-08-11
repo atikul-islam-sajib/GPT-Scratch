@@ -74,15 +74,42 @@ if __name__ == "__main__":
     parser.add_argument(
         "--out_features",
         type=int,
-        default=config()["GPT"]["dimension"],
+        default=config()["GPT"]["dim_feedforward"],
         help="Output features".capitalize(),
     )
+    parser.add_argument(
+        "--activation",
+        type=str,
+        default=config()["GPT"]["activation"],
+        help="Activation function".capitalize(),
+    )
+    parser.add_argument(
+        "--dropout",
+        type=float,
+        default=config()["GPT"]["dropout"],
+        help="Define the dropout rate".capitalize(),
+    )
+    parser.add_argument(
+        "--bias",
+        type=bool,
+        default=config()["GPT"]["bias"],
+        help="Define if bias is used".capitalize(),
+    )
+    args = parser.parse_args()
+
+    batch_size = config()["embedding"]["batch_size"]
+    block_size = config()["embedding"]["block_size"]
+
     network = FeedForwardNeuralNetwork(
-        in_features=512,
-        out_features=2048,
-        activation="gelu",
-        dropout=0.1,
-        bias=True,
+        in_features=args.in_features,
+        out_features=args.out_features,
+        activation=args.activation,
+        dropout=args.dropout,
+        bias=args.bias,
     )
 
-    print(network(torch.randn(400, 200, 512)).size())
+    assert network(torch.randn(batch_size, block_size, args.in_features)).size() == (
+        batch_size,
+        block_size,
+        args.in_features,
+    ), "Network output size is not correct".capitalize()

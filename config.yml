@@ -1,4 +1,6 @@
-
+path:
+  FILES_PATH: "./artifacts/files/"
+  
 embedding:
   batch_size: 40
   block_size: 200
@@ -9,3 +11,4 @@ GPT:
   dropout: 0.1
   bias: True
   dim_feedforward: 2048
+  activation: "gelu"
