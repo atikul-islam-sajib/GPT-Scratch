@@ -1,5 +1,8 @@
 import os
+import sys
 import yaml
+
+sys.path.append("./src/")
 
 
 def config():
