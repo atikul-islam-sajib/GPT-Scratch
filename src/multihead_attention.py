@@ -1,7 +1,13 @@
 import os
+import sys
 import torch
 import argparse
 import torch.nn as nn
+
+sys.path.append("./src/")
+
+from utils import config
+from scaled_dot_product import scaled_dot_product_attention
 
 
 class MultiHeadAttentionLayer(nn.Module):
@@ -49,7 +55,21 @@ class MultiHeadAttentionLayer(nn.Module):
             key = key.permute(0, 2, 1, 3)
             value = value.permute(0, 2, 1, 3)
 
-            return value
+            attention = scaled_dot_product_attention(
+                query=query, key=key, value=value, mask=mask
+            )
+
+            assert (
+                attention.size() == query.size() == key.size() == value.size()
+            ), "Attention must have the same size as QKV".capitalize()
+
+            attention = attention.view(
+                attention.size(0),
+                attention.size(2),
+                attention.size(1) * attention.size(3),
+            )
+
+            return attention
 
 
 if __name__ == "__main__":
