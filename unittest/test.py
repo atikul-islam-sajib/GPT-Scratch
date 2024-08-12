@@ -9,6 +9,7 @@ sys.path.append("./src/")
 from utils import config
 from scaled_dot_product import scaled_dot_product_attention
 from multihead_attention import MultiHeadAttentionLayer
+from feedforward_network import FeedForwardNeuralNetwork
 
 
 class UnitTest(unittest.TestCase):
@@ -20,12 +21,21 @@ class UnitTest(unittest.TestCase):
         self.nheads = config()["GPT"]["nheads"]
         self.dropout = config()["GPT"]["dropout"]
         self.bias = config()["GPT"]["bias"]
+        self.activation = config()["GPT"]["activation"]
+        self.dim_feedforward = config()["GPT"]["dim_feedforward"]
 
         self.multihead = MultiHeadAttentionLayer(
             dimension=self.dimension,
             nheads=self.nheads,
             dropout=self.dropout,
             bias=self.bias,
+        )
+
+        self.network = FeedForwardNeuralNetwork(
+            in_features=self.dimension,
+            out_features=self.dim_feedforward,
+            dropout=self.dropout,
+            activation=self.activation,
         )
 
     def test_scaled_dot_prododuct(self):
@@ -121,6 +131,14 @@ class UnitTest(unittest.TestCase):
 
         self.assertEqual(
             self.multihead(x=embedding, mask=mask).size(),
+            (self.batch_size, self.block_size, self.dimension),
+        )
+
+    def test_feedforward_network(self):
+        self.assertEqual(
+            self.network(
+                torch.randn(self.batch_size, self.block_size, self.dimension)
+            ).size(),
             (self.batch_size, self.block_size, self.dimension),
         )
 
