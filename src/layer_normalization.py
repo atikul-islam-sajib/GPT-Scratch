@@ -1,4 +1,5 @@
 import sys
+import math
 import torch
 import argparse
 import torch.nn as nn
@@ -18,8 +19,8 @@ class LayerNormalization(nn.Module):
         self.epsilon = eps
         self.bias = bias
 
-        self.gamma = nn.Parameter(data=torch.ones((1, 1, normalized_shape)))
-        self.beta = nn.Parameter(data=torch.zeros((1, 1, normalized_shape)))
+        self.gamma = nn.Parameter(data=torch.ones((normalized_shape,)))
+        self.beta = nn.Parameter(data=torch.zeros((normalized_shape,)))
 
     def forward(self, x: torch.Tensor):
         if isinstance(x, torch.Tensor):
