@@ -5,6 +5,8 @@ import torch.nn as nn
 
 sys.path.append("./src/")
 
+from utils import config
+
 
 class LayerNormalization(nn.Module):
     def __init__(
@@ -36,6 +38,35 @@ class LayerNormalization(nn.Module):
 
 
 if __name__ == "__main__":
-    layer_norm = LayerNormalization(normalized_shape=512, eps=1e-05, bias=True)
+    parser = argparse.ArgumentParser(description="Layer Normalization for GPT".title())
+    parser.add_argument(
+        "--normalized_shape",
+        type=int,
+        default=config()["GPT"]["dimension"],
+        help="Define the normalized shape".capitalize(),
+    )
+    parser.add_argument(
+        "--eps",
+        type=float,
+        default=config()["GPT"]["eps"],
+        help="Define the epsilon value".capitalize(),
+    )
 
-    print(layer_norm(torch.randn(40, 200, 512)).size())
+    args = parser.parse_args()
+
+    batch_size = config()["embedding"]["batch_size"]
+    block_size = config()["embedding"]["block_size"]
+
+    layer_norm = LayerNormalization(
+        normalized_shape=args.normalized_shape,
+        eps=args.eps,
+        bias=True,
+    )
+
+    assert layer_norm(
+        torch.randn(batch_size, block_size, args.normalized_shape)
+    ).size() == (
+        batch_size,
+        block_size,
+        args.normalized_shape,
+    ), "Layer Normalization failed".capitalize()
