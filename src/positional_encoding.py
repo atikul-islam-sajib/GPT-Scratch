@@ -4,6 +4,10 @@ import torch
 import argparse
 import torch.nn as nn
 
+sys.path.append("./src/")
+
+from utils import config
+
 
 class PositionalEncoding(nn.Module):
     def __init__(self, sequence_length: int = 200, dimension: int = 512):
@@ -25,13 +29,38 @@ class PositionalEncoding(nn.Module):
                         position / (10000 ** ((2 * index) / dimension))
                     )
 
-        print("done")
-
     def forward(self, x: torch.Tensor):
         if isinstance(x, torch.Tensor):
             return self.positional_encoding.unsqueeze(0)[:, : x.size(1), :]
 
 
 if __name__ == "__main__":
-    positional = PositionalEncoding(sequence_length=200, dimension=512)
-    print(positional(torch.randn(40, 200, 512)).size())
+    parser = argparse.ArgumentParser(description="Positional Encoding for GPT".title())
+    parser.add_argument(
+        "--block_size",
+        type=int,
+        default=config()["embedding"]["block_size"],
+        help="Block size or sequence length".capitalize(),
+    )
+    parser.add_argument(
+        "--dimension",
+        type=int,
+        default=config()["GPT"]["dimension"],
+        help="Dimension of the embedding".capitalize(),
+    )
+
+    args = parser.parse_args()
+
+    batch_size = config()["embedding"]["batch_size"]
+
+    positional = PositionalEncoding(
+        sequence_length=args.block_size, dimension=args.dimension
+    )
+
+    assert positional(
+        torch.randn(batch_size, args.block_size, args.dimension)
+    ).size() == (
+        batch_size // batch_size,
+        args.block_size,
+        args.dimension,
+    ), "Positional encoding is not working properly".capitalize()
