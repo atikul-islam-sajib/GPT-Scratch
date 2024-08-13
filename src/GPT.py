@@ -59,6 +59,60 @@ class GPT(nn.Module):
 
 
 if __name__ == "__main__":
-    GPTModel = GPT()
+    parser = argparse.ArgumentParser(description="GPT model".title())
+    parser.add_argument(
+        "--dimension",
+        type=int,
+        default=config()["GPT"]["dimension"],
+        help="Dimension of the input tensor".capitalize(),
+    )
+    parser.add_argument(
+        "--nheads",
+        type=int,
+        default=config()["GPT"]["nheads"],
+        help="Number of heads in the multihead attention".capitalize(),
+    )
+    parser.add_argument(
+        "--dim_feedforward",
+        type=int,
+        default=config()["GPT"]["dim_feedforward"],
+        help="Dimension of the feedforward layer".capitalize(),
+    )
+    parser.add_argument(
+        "--dropout",
+        type=float,
+        default=config()["GPT"]["dropout"],
+        help="Dropout rate".capitalize(),
+    )
+    parser.add_argument(
+        "--activation",
+        type=str,
+        default=config()["GPT"]["activation"],
+        help="Activation function".capitalize(),
+    )
+    parser.add_argument(
+        "--bias",
+        type=bool,
+        default=config()["GPT"]["bias"],
+        help="Whether to use bias in the linear layers".capitalize(),
+    )
 
-    print(GPTModel(torch.randn(40, 200, 512)).size())
+    args = parser.parse_args()
+
+    batch_size = config()["embedding"]["batch_size"]
+    block_size = config()["embedding"]["block_size"]
+
+    GPTModel = GPT(
+        dimension=args.dimension,
+        nheads=args.nheads,
+        dim_feedforward=args.dim_feedforward,
+        dropout=args.dropout,
+        activation=args.activation,
+        bias=args.bias,
+    )
+
+    assert transformer(torch.randn(batch_size, block_size, args.dimension)).size() == (
+        batch_size,
+        block_size,
+        args.dimension,
+    ), "TransformerEncoderBlock is not working correctly".capitalize()
