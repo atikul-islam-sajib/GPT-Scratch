@@ -191,7 +191,32 @@ class UnitTest(unittest.TestCase):
         )
 
     def test_transformer_block(self):
-        pass
+        embedding_layer = nn.Embedding(
+            num_embeddings=self.block_size, embedding_dim=self.dimension
+        )  # 200, 512
+
+        input_texts = torch.randint(
+            0, self.block_size, (self.batch_size * 10, self.block_size)
+        )
+        target_text = torch.randint(
+            0, self.block_size, (self.batch_size * 10, self.block_size)
+        )  # 4000, 200
+
+        self.assertEqual(input_texts.size(), target_text.size())
+
+        dataset = DataLoader(
+            dataset=list(zip(input_texts, target_text)),
+            batch_size=self.batch_size,
+            shuffle=True,
+        )
+
+        X, y = next(iter(dataset))
+
+        self.assertEqual(X.size(), y.size())
+
+        X = embedding_layer(X)
+
+        self.assertEqual(X.size(), (self.batch_size, self.block_size, self.dimension))
 
 
 if __name__ == "__main__":
