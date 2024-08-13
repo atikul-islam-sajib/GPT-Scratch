@@ -49,4 +49,16 @@ class GPT(nn.Module):
 
     def forward(self, x: torch.Tensor, mask=None):
         if isinstance(x, torch.Tensor):
-            pass
+            for layer in self.model:
+                x = layer(x=x, mask=mask)
+
+            return x
+
+        else:
+            raise TypeError("Input must be a torch.Tensor".capitalize())
+
+
+if __name__ == "__main__":
+    GPTModel = GPT()
+
+    print(GPTModel(torch.randn(40, 200, 512)).size())
