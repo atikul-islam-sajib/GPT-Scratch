@@ -44,13 +44,13 @@ class GPT(nn.Module):
                     eps=self.eps,
                     bias=self.bias,
                 )
-                for _ in tqdm(range(self.num_layers))
+                for _ in range(self.num_layers)
             ]
         )
 
     def forward(self, x: torch.Tensor, mask=None):
         if isinstance(x, torch.Tensor):
-            for layer in self.model:
+            for layer in tqdm(self.model):
                 x = layer(x=x, mask=mask)
 
             return x

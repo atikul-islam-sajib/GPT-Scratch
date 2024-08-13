@@ -13,6 +13,7 @@ from feedforward_network import FeedForwardNeuralNetwork
 from transformer import TransformerEncoderBlock
 from positional_encoding import PositionalEncoding
 from layer_normalization import LayerNormalization
+from GPT import GPT
 
 
 class UnitTest(unittest.TestCase):
@@ -27,6 +28,7 @@ class UnitTest(unittest.TestCase):
         self.activation = config()["GPT"]["activation"]
         self.dim_feedforward = config()["GPT"]["dim_feedforward"]
         self.eps = float(config()["GPT"]["eps"])
+        self.num_layers = config()["GPT"]["num_layers"]
 
         self.multihead = MultiHeadAttentionLayer(
             dimension=self.dimension,
@@ -59,6 +61,17 @@ class UnitTest(unittest.TestCase):
         self.positional_encoding = PositionalEncoding(
             sequence_length=self.block_size,
             dimension=self.dimension,
+        )
+
+        self.GPTModel = GPT(
+            dimension=self.dimension,
+            nheads=self.nheads,
+            num_layers=self.num_layers,
+            dropout=self.dropout,
+            activation=self.activation,
+            dim_feedforward=self.dim_feedforward,
+            eps=self.eps,
+            bias=self.bias,
         )
 
     def test_scaled_dot_prododuct(self):
@@ -212,11 +225,41 @@ class UnitTest(unittest.TestCase):
 
         X = embedding_layer(X)
 
-        self.assertEqual(X.size(), y.size())
         self.assertEqual(input_texts.size(), target_text.size())
         self.assertEqual(X.size(), (self.batch_size, self.block_size, self.dimension))
         self.assertEqual(
             self.trasformer(x=X, mask=None).size(),
+            (self.batch_size, self.block_size, self.dimension),
+        )
+
+    def test_GPTModel(self):
+        embedding_layer = nn.Embedding(
+            num_embeddings=self.block_size, embedding_dim=self.dimension
+        )
+
+        input_texts = torch.randint(
+            0, self.block_size, (self.batch_size * 10, self.block_size)
+        )
+        target_text = torch.randint(
+            0, self.block_size, (self.batch_size * 10, self.block_size)
+        )
+
+        dataset = DataLoader(
+            dataset=list(zip(input_texts, target_text)),
+            batch_size=self.batch_size,
+            shuffle=True,
+        )
+
+        X, y = next(iter(dataset))
+
+        self.assertEqual(X.size(), y.size())
+
+        X = embedding_layer(X)
+
+        self.assertEqual(input_texts.size(), target_text.size())
+        self.assertEqual(X.size(), (self.batch_size, self.block_size, self.dimension))
+        self.assertEqual(
+            self.GPTModel(x=X, mask=None).size(),
             (self.batch_size, self.block_size, self.dimension),
         )
 
