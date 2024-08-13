@@ -50,8 +50,8 @@ class GPT(nn.Module):
 
     def forward(self, x: torch.Tensor, mask=None):
         if isinstance(x, torch.Tensor):
-            for layer in tqdm(self.model):
-                x = layer(x=x, mask=mask)
+            for GPTModel in tqdm(self.model):
+                x = GPTModel(x=x, mask=mask)
 
             return x
 
