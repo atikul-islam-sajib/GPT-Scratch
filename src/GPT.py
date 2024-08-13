@@ -73,6 +73,12 @@ if __name__ == "__main__":
         help="Number of heads in the multihead attention".capitalize(),
     )
     parser.add_argument(
+        "--num_layers",
+        type=int,
+        default=config()["GPT"]["num_layers"],
+        help="Number of layers in the transformer".capitalize(),
+    )
+    parser.add_argument(
         "--dim_feedforward",
         type=int,
         default=config()["GPT"]["dim_feedforward"],
@@ -105,14 +111,15 @@ if __name__ == "__main__":
     GPTModel = GPT(
         dimension=args.dimension,
         nheads=args.nheads,
+        num_layers=args.num_layers,
         dim_feedforward=args.dim_feedforward,
         dropout=args.dropout,
         activation=args.activation,
         bias=args.bias,
     )
 
-    assert transformer(torch.randn(batch_size, block_size, args.dimension)).size() == (
+    assert GPTModel(torch.randn(batch_size, block_size, args.dimension)).size() == (
         batch_size,
         block_size,
         args.dimension,
-    ), "TransformerEncoderBlock is not working correctly".capitalize()
+    ), "GPT Model is not working correctly".upper()
