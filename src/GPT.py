@@ -1,6 +1,7 @@
 import sys
 import torch
 import argparse
+from tqdm import tqdm
 import torch.nn as nn
 
 sys.path.append("./src/")
@@ -43,7 +44,7 @@ class GPT(nn.Module):
                     eps=self.eps,
                     bias=self.bias,
                 )
-                for _ in range(self.num_layers)
+                for _ in tqdm(range(self.num_layers))
             ]
         )
 
