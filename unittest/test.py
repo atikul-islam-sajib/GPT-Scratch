@@ -10,6 +10,8 @@ from utils import config
 from scaled_dot_product import scaled_dot_product_attention
 from multihead_attention import MultiHeadAttentionLayer
 from feedforward_network import FeedForwardNeuralNetwork
+from transformer import TransformerEncoderBlock
+from positional_encoding import PositionalEncoding
 from layer_normalization import LayerNormalization
 
 
@@ -42,6 +44,21 @@ class UnitTest(unittest.TestCase):
 
         self.layernorm = LayerNormalization(
             normalized_shape=self.dimension, eps=self.eps, bias=True
+        )
+
+        self.trasformer = TransformerEncoderBlock(
+            dimension=self.dimension,
+            nheads=self.nheads,
+            dropout=self.dropout,
+            activation=self.activation,
+            dim_feedforward=self.dim_feedforward,
+            eps=self.eps,
+            bias=self.bias,
+        )
+
+        self.positional_encoding = PositionalEncoding(
+            sequence_length=self.block_size,
+            dimension=self.dimension,
         )
 
     def test_scaled_dot_prododuct(self):
@@ -164,6 +181,17 @@ class UnitTest(unittest.TestCase):
             ).size(),
             (self.batch_size, self.block_size, self.dimension),
         )
+
+    def test_positional_encoding(self):
+        self.assertEqual(
+            self.positional_encoding(
+                torch.randn(self.batch_size, self.block_size, self.dimension)
+            ).size(),
+            (self.batch_size // self.batch_size, self.block_size, self.dimension),
+        )
+
+    def test_transformer_block(self):
+        pass
 
 
 if __name__ == "__main__":
