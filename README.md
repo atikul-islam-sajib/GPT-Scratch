@@ -18,19 +18,16 @@ The implementation in this repository covers the key components of the GPT archi
 ## Directory Structure
 
 ```
-├── README.md                # This file
-├── gpt_model.py             # Core GPT model implementation
-├── train.py                 # Script for training the model
-├── generate.py              # Script for text generation
-├── data/
-│   ├── dataset.txt          # Example dataset for training
-│   └── tokenizer.py         # Tokenizer script for processing text data
-├── utils/
-│   ├── positional_encoding.py  # Positional encoding implementation
-│   ├── attention.py            # Multi-head self-attention implementation
-│   └── feed_forward.py         # Feed-forward network implementation
-├── requirements.txt         # Python dependencies
-└── checkpoints/             # Directory to save model checkpoints
+├───artifacts
+│   ├───checkpoints
+│   └───files
+├───data
+│   ├───processed
+│   └───raw
+├───logs
+├───notebooks
+├───src
+└───unittest
 ```
 
 ## Requirements
