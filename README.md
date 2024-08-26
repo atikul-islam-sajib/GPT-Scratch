@@ -54,6 +54,8 @@ To train the GPT model from scratch, you can use the `train.py` script. This scr
 
 ```bash
 python train.py --data_path data/dataset.txt --epochs 10 --batch_size 32 --learning_rate 0.001
+
+Did not commit the updated code so far as it is under uniitest
 ```
 
 
